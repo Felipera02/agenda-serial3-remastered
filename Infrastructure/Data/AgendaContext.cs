@@ -1,7 +1,7 @@
 ﻿using AgendaSerial3.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace AgendaSerial3.Infrastructure.Settings
+namespace AgendaSerial3.Infrastructure.Data
 {
     public class AgendaContext(DbContextOptions<AgendaContext> opt) : DbContext(opt)
     {

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AgendaSerial3.Domain.Entities;
-using AgendaSerial3.Infrastructure.Settings;
+using AgendaSerial3.Infrastructure.Data;
 
 namespace AgendaSerial3.Presentation.Controllers
 {

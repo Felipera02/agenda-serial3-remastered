@@ -1,5 +1,5 @@
 ﻿using AgendaSerial3.Domain.Entities;
-using AgendaSerial3.Infrastructure.Settings;
+using AgendaSerial3.Infrastructure.Data;
 
 namespace AgendaSerial3.Infrastructure.Repositories
 {

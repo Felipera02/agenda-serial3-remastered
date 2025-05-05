@@ -1,4 +1,4 @@
-using AgendaSerial3.Infrastructure.Settings;
+using AgendaSerial3.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

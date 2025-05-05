@@ -8,7 +8,7 @@
         public DateTime? BeginDate { get; set; }
         public DateTime? EndDate { get; set; }
 
-        public int CalendarId;
+        public int CalendarId { get; set; }
         public PersonalCalendar? Calendar { get; set; }
     }
 }
