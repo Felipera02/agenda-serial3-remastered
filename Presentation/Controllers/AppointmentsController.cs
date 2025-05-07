@@ -1,108 +1,95 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using AgendaSerial3.Domain.Entities;
-using AgendaSerial3.Infrastructure.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using AgendaSerial3.Application.DTOs;
+using AgendaSerial3.Application.UseCases.Appointments;
 
 namespace AgendaSerial3.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AppointmentsController : ControllerBase
+    public class AppointmentsController(
+        CreateAppointment createAppointment,
+        GetAppointmentById getAppointmentById,
+        GetAppointmentByCalendar getAppointmentByCalendar,
+        GetAppointmentByUser getAppointmentByUser,
+        UpdateAppointment updateAppointment,
+        RemoveAppointment removeAppointment) : ControllerBase
     {
-        private readonly AgendaContext _context;
-
-        public AppointmentsController(AgendaContext context)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] AppointmentRequestDTO dto)
         {
-            _context = context;
-        }
-
-        // GET: api/Appointments
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments()
-        {
-            return await _context.Appointments.ToListAsync();
-        }
-
-        // GET: api/Appointments/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Appointment>> GetAppointment(int id)
-        {
-            var appointment = await _context.Appointments.FindAsync(id);
-
-            if (appointment == null)
-            {
-                return NotFound();
-            }
-
-            return appointment;
-        }
-
-        // PUT: api/Appointments/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAppointment(int id, Appointment appointment)
-        {
-            if (id != appointment.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(appointment).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                var result = await createAppointment.ExecuteAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (ArgumentException ex)
             {
-                if (!AppointmentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ex.Message);
             }
-
-            return NoContent();
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        // POST: api/Appointments
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetAppointment", new { id = appointment.Id }, appointment);
+            try
+            {
+                var result = await getAppointmentById.ExecuteAsync(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        // DELETE: api/Appointments/5
+        [HttpGet("calendar/{calendarId}")]
+        public async Task<IActionResult> GetByCalendar(int calendarId)
+        {
+             var result = await getAppointmentByCalendar.ExecuteAsync(calendarId);
+             return Ok(result);
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetByUser(int userId)
+        {
+            var result = await getAppointmentByUser.ExecuteAsync(userId);
+            return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] AppointmentRequestDTO dto)
+        {
+            try
+            {
+                var result = await updateAppointment.ExecuteAsync(id, dto);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAppointment(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var appointment = await _context.Appointments.FindAsync(id);
-            if (appointment == null)
+            try
             {
-                return NotFound();
+                await removeAppointment.ExecuteAsync(id);
+                return NoContent();
             }
-
-            _context.Appointments.Remove(appointment);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool AppointmentExists(int id)
-        {
-            return _context.Appointments.Any(e => e.Id == id);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

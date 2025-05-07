@@ -1,4 +1,6 @@
+
 using AgendaSerial3.Infrastructure.Data;
+using AgendaSerial3.Infrastructure.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,9 @@ if (connectionString is null)
 }
 
 builder.Services.AddDbContext<AgendaContext>(opt => opt.UseNpgsql(connectionString));
+
+builder.Services.AddUseCases();
+builder.Services.AddRepositories();
 
 var app = builder.Build();
 

@@ -1,113 +1,91 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using AgendaSerial3.Domain.Entities;
-using AgendaSerial3.Infrastructure.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using AgendaSerial3.Application.DTOs;
+using AgendaSerial3.Application.UseCases.PersonalCalendars;
 
 namespace AgendaSerial3.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CalendarsController : ControllerBase
+    public class CalendarsController(
+        CreateCalendar createCalendar,
+        GetCalendarById getCalendarById,
+        GetCalendarByUser getCalendarByUser,
+        UpdateCalendar updateCalendar,
+        RemoveCalendar removeCalendar) : ControllerBase
     {
-        private readonly AgendaContext _context;
-
-        public CalendarsController(AgendaContext context)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] PersonalCalendarRequestDTO dto)
         {
-            _context = context;
-        }
-
-        // GET: api/Calendars
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PersonalCalendar>>> GetCalendars()
-        {
-            return await _context.Calendars.ToListAsync();
-        }
-
-        // GET: api/Calendars/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<PersonalCalendar>> GetPersonalCalendar(int id)
-        {
-            var personalCalendar = await _context.Calendars.FindAsync(id);
-
-            if (personalCalendar == null)
-            {
-                return NotFound();
-            }
-
-            return personalCalendar;
-        }
-
-        // PUT: api/Calendars/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPersonalCalendar(int id, PersonalCalendar personalCalendar)
-        {
-            if (id != personalCalendar.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(personalCalendar).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                var result = await createCalendar.ExecuteAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (ArgumentException ex)
             {
-                if (!PersonalCalendarExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ex.Message);
             }
-
-            return NoContent();
         }
 
-        // POST: api/Calendars
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<PersonalCalendar>> PostPersonalCalendar(PersonalCalendar personalCalendar)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            //var user = await _context.Users.FindAsync(personalCalendar.UserId);
-            //if (user == null)
-            //{
-            //    return BadRequest();
-            //}
-            _context.Calendars.Add(personalCalendar);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPersonalCalendar", new { id = personalCalendar.Id }, personalCalendar);
+            try
+            {
+                var result = await getCalendarById.ExecuteAsync(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        // DELETE: api/Calendars/5
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetByUser(int userId)
+        {
+            var result = await getCalendarByUser.ExecuteAsync(userId);
+            return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] PersonalCalendarRequestDTO dto)
+        {
+            try
+            {
+                var result = await updateCalendar.ExecuteAsync(id, dto);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePersonalCalendar(int id)
+        public async Task<IActionResult> Remove(int id)
         {
-            var personalCalendar = await _context.Calendars.FindAsync(id);
-            if (personalCalendar == null)
+            try
             {
-                return NotFound();
+                await removeCalendar.ExecuteAsync(id);
+                return NoContent();
             }
-
-            _context.Calendars.Remove(personalCalendar);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool PersonalCalendarExists(int id)
-        {
-            return _context.Calendars.Any(e => e.Id == id);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

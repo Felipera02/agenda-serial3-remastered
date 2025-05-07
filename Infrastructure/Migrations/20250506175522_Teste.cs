@@ -5,7 +5,7 @@
 namespace AgendaSerial3.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class UserCreate : Migration
+    public partial class Teste : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

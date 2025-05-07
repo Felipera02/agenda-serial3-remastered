@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AgendaSerial3.Infrastructure.Migrations
 {
     [DbContext(typeof(AgendaContext))]
-    [Migration("20250503194247_InitialCreate2")]
-    partial class InitialCreate2
+    [Migration("20250506175522_Teste")]
+    partial class Teste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,7 @@ namespace AgendaSerial3.Infrastructure.Migrations
                     b.Property<DateTime?>("BeginDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("CalendarId1")
+                    b.Property<int>("CalendarId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Description")
@@ -50,7 +50,7 @@ namespace AgendaSerial3.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CalendarId1");
+                    b.HasIndex("CalendarId");
 
                     b.ToTable("Appointments");
                 });
@@ -101,7 +101,9 @@ namespace AgendaSerial3.Infrastructure.Migrations
                 {
                     b.HasOne("AgendaSerial3.Domain.Entities.PersonalCalendar", "Calendar")
                         .WithMany("Appointments")
-                        .HasForeignKey("CalendarId1");
+                        .HasForeignKey("CalendarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Calendar");
                 });
