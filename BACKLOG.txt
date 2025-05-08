@@ -1,0 +1,38 @@
+1. Cadastro de Usuário
+   Como usuário, quero me cadastrar no sistema informando meu nome e username para poder acessar e gerenciar meus calendários pessoais.
+
+2. Buscar Usuário por ID
+   Como administrador ou sistema, quero buscar um usuário pelo seu ID, para obter seus dados cadastrados.
+
+3. Buscar Usuário por Nome de Usuário
+   Como sistema, quero buscar um usuário pelo seu nome de usuário para garantir que não exista um outro usuario com o mesmo username.
+
+4. Excluir Usuário
+   Como usuário, quero poder excluir meu cadastro para deixar de usar o sistema.
+
+5. Criar Calendário Pessoal
+   Como usuário, quero criar um calendário pessoal com um nome para organizar meus compromissos.
+
+6. Buscar Calendários de um Usuário
+   Como usuário, quero listar todos os calendários que eu criei para visualizar meus planejamentos.
+
+7. Atualizar Nome do Calendário
+   Como usuário, quero alterar o nome de um calendário meu para manter a organização atualizada.
+
+8. Excluir Calendário
+   Como usuário quero excluir um calendário para remover planejamentos que não são mais necessários.
+
+9. Criar Compromisso
+   Como usuário, quero criar um compromisso com título, descrição e datas de início e fim para planejar minhas atividades.
+
+10. Validar Datas dos Compromissos
+    Como sistema, quero garantir que a data de inicio de um compromisso seja sempre anterior a data de termino para evitar dados inconsistentes.
+
+11. Listar Compromissos de um Calendário
+    Como usuário, quero visualizar todos os compromissos de um calendário para acompanhar minha agenda.
+
+12. Atualizar Compromisso
+    Como usuário quero editar os dados de um compromisso para manter minha agenda atualizada.
+
+13. Excluir Compromisso
+    Como usuário, quero excluir um compromisso da minha agenda para remover tarefas concluídas ou canceladas.
