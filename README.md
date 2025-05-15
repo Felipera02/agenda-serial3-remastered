@@ -30,7 +30,7 @@ Sistema de Agenda Pessoal construído com ASP.NET Core 8, Entity Framework Core 
 3. Para testar o programa, importe a [coleção do Postman](https://drive.google.com/file/d/1yIARTyy7ypbl9VlfISpdOr9lXCsw_jrQ/view?usp=sharing) feita pela equipe Serial3.
 
 ## 3. Integrantes
-Erick da Silva Pereira Pinto - 06007298
-Felipe Braga Gomes - 06006912
-Gabriel Nunes Mazzaro Lopes - 06008527
-Lucas Cardia Quintan Valle - 06007104
+- Erick da Silva Pereira Pinto - 06007298
+- Felipe Braga Gomes - 06006912
+- Gabriel Nunes Mazzaro Lopes - 06008527
+- Lucas Cardia Quintan Valle - 06007104
