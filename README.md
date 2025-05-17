@@ -34,3 +34,7 @@ Sistema de Agenda Pessoal construído com ASP.NET Core 8, Entity Framework Core 
 - Felipe Braga Gomes - 06006912
 - Gabriel Nunes Mazzaro Lopes - 06008527
 - Lucas Cardia Quintan Valle - 06007104
+
+## 4. Entregáveis
+- Diagrama: https://prnt.sc/Uk8ozzuCBUcf
+- Vídeo: https://youtu.be/ZNl8nfhftWw
