@@ -23,17 +23,15 @@
   - [ ] Criar coleção no Postman, Insomnia ou ferramenta similar.
   - [ ] Incluir todos os endpoints.
 
-- [ ] **Vídeo de apresentação (até 10 minutos)**  
-  - [ ] Apresentar como se fosse para investidor.
-  - [ ] Explicar arquitetura escolhida.
-  - [ ] Demonstrar implementação do sistema.
-  - [ ] Destacar técnicas de engenharia de software utilizadas.
+- [X] **Vídeo de apresentação (até 10 minutos)**  
+  - [X] Apresentar como se fosse para investidor.
+  - [X] Explicar arquitetura escolhida.
+  - [X] Demonstrar implementação do sistema.
+  - [X] Destacar técnicas de engenharia de software utilizadas.
 
-
-NÃO ENTENDI A INJEÇÃO DE DEPENDÊNCIAS
+NÃO COLOCOU REFERENCIA PARA O VIDEO NO README.MD
 NÃO APRESENTOU DIAGRAMA DE COMPONENTES
-NÃO APRESENTOU O VIDEO
-NÃO APRESENTOU COLEÇÃO DE TESTES
 NÃO É PARA CONSTRUIR UM CASO DE USO PARA CADA FUNCIONALIDADE
+A IDEIA ERA FINALIZAR AV1 COM O BACKEND COMPLETO PRONTO, VCS MENCIONAM VÁRIAS VEZES NO VIDEO QUE ESTÁ EM ESTÁGIO INICIAL
 
-NOTA 5
+NOTA 8
