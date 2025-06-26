@@ -1,0 +1,6 @@
+@AgendaSerial3.WebAPI_HostAddress = http://localhost:5115
+
+GET {{AgendaSerial3.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

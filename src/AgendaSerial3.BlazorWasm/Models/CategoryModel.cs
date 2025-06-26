@@ -1,0 +1,19 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace AgendaSerial3.BlazorWasm.Models
+{
+    public class CategoryModel
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Nome da categoria é obrigatório")]
+        [MaxLength(100, ErrorMessage = "Nome deve ter no máximo 100 caracteres")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Cor é obrigatória")]
+        public string Color { get; set; } = "#3B82F6";
+
+        // Propriedade para controlar visibilidade (não é enviada para a API)
+        public bool IsVisible { get; set; } = true;
+    }
+}
