@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Front + Back (dev)",
+    "Projects": [
+      {
+        "Path": "src\\AgendaSerial3.WebAPI\\AgendaSerial3.WebAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "..\\..\\..\\..\\Documents\\agenda-serial3-ultimate-edition\\src\\AgendaSerial3.BlazorWasm\\AgendaSerial3.BlazorWasm.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
