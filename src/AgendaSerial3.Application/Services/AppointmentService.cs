@@ -88,6 +88,8 @@ public class AppointmentService(AppointmentRepository appointmentRepository, Cat
         appointment.IsCompleted = appointmentDto.IsCompleted;
         appointment.UpdatedAt = DateTime.UtcNow;
 
+        await _appointmentRepository.LoadCategoryAsync(appointment);
+
         var updatedAppointment = await _appointmentRepository.UpdateAsync(appointment);
 
         return new AppointmentDto

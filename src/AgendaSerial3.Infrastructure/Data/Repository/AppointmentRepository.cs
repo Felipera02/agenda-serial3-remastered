@@ -26,4 +26,12 @@ public class AppointmentRepository(AgendaDbContext context) : GenericRepository<
 
         return appointment;
     }
+
+    public async Task LoadCategoryAsync(Appointment appointment)
+    {
+        await _context.Entry(appointment)
+            .Reference(a => a.Category)
+            .LoadAsync();
+    }
+
 }

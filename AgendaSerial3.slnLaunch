@@ -4,10 +4,11 @@
     "Projects": [
       {
         "Path": "src\\AgendaSerial3.WebAPI\\AgendaSerial3.WebAPI.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "https-dev"
       },
       {
-        "Path": "..\\..\\..\\..\\Documents\\agenda-serial3-ultimate-edition\\src\\AgendaSerial3.BlazorWasm\\AgendaSerial3.BlazorWasm.csproj",
+        "Path": "src\\AgendaSerial3.BlazorWasm\\AgendaSerial3.BlazorWasm.csproj",
         "Action": "Start"
       }
     ]

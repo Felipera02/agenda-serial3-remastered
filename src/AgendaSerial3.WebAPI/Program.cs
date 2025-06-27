@@ -55,16 +55,19 @@ builder.Services.AddAuthentication(options =>
 });
 
 // CORS
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazorWasm", policy =>
     {
-        policy.WithOrigins("https://localhost:7001", "http://localhost:5001")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
 });
+
 
 // Repository e Services
 builder.Services.AddScoped<AppointmentRepository>();
