@@ -18,9 +18,17 @@ Utilizamos o Repository Pattern afim de adicionar uma camada a mais de abstraç�
 
 
 # Princípios SOLID em prática 
-[IMPLEMENTAÇÃO EM BREVE]
+**Open/Closed Principle**
 
+1. GenericRepository.cs
+- Arquivo: `src/AgendaSerial3.Infrastructure/Data/Repository/GenericRepository.cs`
+- Linhas: 1–55
 
+2. CategoryRepository.cs
+- Arquivo: `src/AgendaSerial3.Infrastructure/Data/Repository/CategoryRepository.cs`
+- Linhas: 1–30
+ 
+O princípio Open/Closed é aplicado pelo repositório genérico `GenericRepository<T>`, que disponibiliza operações CRUD que podem ser utilizadas porqualquer entidade do aplicativo. Esta classe está **fechada para alterações**, pois não requer alterações para novos comportamentos, mas está **disponível para extensão**, já que outras classes, como `CategoryRepository`, podem herdá-la e implementar comportamentos específicos ou sobrescrever métodos conforme a necessidade. No exemplo, `CategoryRepository` amplia `GenericRepository<Category>`, alterando a funcionalidade de DeleteAsync atrelao à entidade em questão mas mantendo o comportamento padrão pra outras entidades.
 
 # Convenções de nomenclatura claras 
 Para este projeto, decidimos usar o inglês na maior parte do tempo, sempre respeitando as convençoes do C# e demonstrando clareza. O trecho abaixo, presente entre as linhas 9-19 do arquivo *AppointmentRepository* demonstra isso:
@@ -115,7 +123,7 @@ public async Task<IActionResult> CreateAppointment([FromBody] AppointmentDto app
     }
 ```
 
-9 - Exemplos de validação de entrada  
+# Exemplos de validação de entrada  
 Arquivo *LoginDto.cs*, linhas 5-23
 ```csharp
 public class RegisterDto
@@ -140,5 +148,11 @@ public class RegisterDto
 }
 ```
 
-10 - Heurísticas de usabilidade no frontend  
-[IMPLEMENTAÇÃO EM BREVE]
+# Heurísticas de usabilidade no frontend  
+```csharp
+<div class="relative h-16 border-b border-r border-gray-200 cursor-pointer transition-colors duration-200 @(isToday ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-gray-100")"
+                             @onclick="() => OnCellClick.InvokeAsync(cellDateTime)"
+                             title="Adicionar compromisso às @hour:00">
+```
+
+**Feedback ao Usuário:** Ao passar o mouse sobre as células do calendário, elas mudam de cor (hover:bg-blue-100, hover:bg-gray-100), sinalizando que podem ser selecionadas. O @onclick="() => OnCellClick.InvokeAsync(cellDateTime)" indica uma resposta imediata visual e funcional.
