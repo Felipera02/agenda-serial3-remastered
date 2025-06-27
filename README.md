@@ -1,19 +1,29 @@
-# Em Construção
-Aplicação de padrões de projeto
+##### EM CONSTRUÇÃO
 
-Utilizamos o Repository Pattern. Por mais que este padrão seja utilizado visando adicionar uma camada de abstração a mais, no nosso caso utilizamos ele para conseguir reaproveitar operações comuns a entidades diferentes. Enquanto que, para outras operações mais especificas, utilizamos diretamente os operadores Linq na própria camada de Services, visto que o próprio Entity Framework Core já oferece uma camada de abstração.
+# Integrantes
+- Erick da Silva Pereira Pinto - 06007298
+- Felipe Braga Gomes - 06008527
+- Gabriel Nunes Mazzaro Lopes - 06008527
+- Lucas Cardia Quintan Valle - 06007104
+
+# Apresentação
+Link pro vídeo no YouTube: https://youtu.be/Oxq0TKhelkQ
+
+# Aplicação de padrões de projeto
+Utilizamos o Repository Pattern afim de adicionar uma camada a mais de abstração entre os serviços e os dados do banco.  Na nossa implementação, utilizamos um Repositório Genérico para métodos que fossem gerais a todas as entidades, enquanto que, para metodos especificos, este foram implementados nos repositórios que herdaram do genérico.
 
 
-Princípios SOLID em prática 
-Pelo menos um dos princípios do SOLID, como por exemplo o Single Responsibility ou Open/Closed.  **Deve ser indicado no Readme.md o nome do código fonte e os números das linhas onde se encontra a implementação**.
+# Princípios SOLID em prática 
+FALTA
 
 
 
-Convenções de nomenclatura claras 
-
-
-** Documentação mínima de código  **
-Comentários objetivos em pontos estratégicos (como em métodos complexos) ajudam a entender a lógica sem detalhar linha a linha. Comentário inteligente.  **Deve ser indicado no Readme.md o nome do código fonte e os números das linhas onde se encontra a implementação**.
+# Convenções de nomenclatura claras 
+Para este projeto, decidimos usar o inglês na maior parte do tempo, sempre respeitando as convençoes e demonstrando clareza. O trecho abaixo, presente entre as linhas ??-?? do arquivo ???? demonstra isso:
+    print(f)
+[inserir justificativas]
+# ** Documentação mínima de código  **
+Não optamos muito pela utilização de comentários, mas no nosso *program.cs* foi dividido de modo que cada comando semelhante fosse agrupado sob o comentário referente aonde tal grupo de linhas 
 
 ** Testes automatizados ** 
 Infelizmente não tivemos tempo de planejar e realizar os testes :(
