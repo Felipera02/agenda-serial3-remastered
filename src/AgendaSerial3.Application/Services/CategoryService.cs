@@ -2,89 +2,72 @@ using AgendaSerial3.Application.DTOs;
 using AgendaSerial3.Domain.Entities;
 using AgendaSerial3.Infrastructure.Data;
 using AgendaSerial3.Infrastructure.Data.Repository;
-using Microsoft.EntityFrameworkCore;
 
-namespace AgendaSerial3.Application.Services
+namespace AgendaSerial3.Application.Services;
+
+public class CategoryService(CategoryRepository categoryRepository)
 {
-    public class CategoryService
+    private readonly CategoryRepository _categoryRepository = categoryRepository;
+
+    public async Task<IEnumerable<CategoryDto>> GetUserCategoriesAsync(string userId)
     {
-        private readonly GenericRepository<Category> _categoryRepository;
-        private readonly AgendaDbContext _context;
-
-        public CategoryService(GenericRepository<Category> categoryRepository, AgendaDbContext context)
+        var categories = await _categoryRepository.FindAsync(c => c.UserId == userId);
+        return categories.Select(c => new CategoryDto
         {
-            _categoryRepository = categoryRepository;
-            _context = context;
-        }
+            Id = c.Id,
+            Name = c.Name,
+            Color = c.Color
+        });
+    }
 
-        public async Task<IEnumerable<CategoryDto>> GetUserCategoriesAsync(string userId)
+    public async Task<CategoryDto> CreateCategoryAsync(CategoryDto categoryDto, string userId)
+    {
+        var category = new Category
         {
-            var categories = await _categoryRepository.FindAsync(c => c.UserId == userId);
-            return categories.Select(c => new CategoryDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Color = c.Color
-            });
-        }
+            Name = categoryDto.Name,
+            Color = categoryDto.Color,
+            UserId = userId
+        };
 
-        public async Task<CategoryDto> CreateCategoryAsync(CategoryDto categoryDto, string userId)
+        var createdCategory = await _categoryRepository.AddAsync(category);
+
+        return new CategoryDto
         {
-            var category = new Category
-            {
-                Name = categoryDto.Name,
-                Color = categoryDto.Color,
-                UserId = userId
-            };
+            Id = createdCategory.Id,
+            Name = createdCategory.Name,
+            Color = createdCategory.Color
+        };
+    }
 
-            var createdCategory = await _categoryRepository.AddAsync(category);
+    public async Task<CategoryDto> UpdateCategoryAsync(CategoryDto categoryDto, string userId)
+    {
+        var category = await _categoryRepository
+            .GetByExpression(c => c.Id == categoryDto.Id && c.UserId == userId);
 
-            return new CategoryDto
-            {
-                Id = createdCategory.Id,
-                Name = createdCategory.Name,
-                Color = createdCategory.Color
-            };
-        }
+        if (category == null)
+            throw new UnauthorizedAccessException("Categoria não encontrada ou não pertence ao usuário");
 
-        public async Task<CategoryDto> UpdateCategoryAsync(CategoryDto categoryDto, string userId)
+        category.Name = categoryDto.Name;
+        category.Color = categoryDto.Color;
+
+        var updatedCategory = await _categoryRepository.UpdateAsync(category);
+
+        return new CategoryDto
         {
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == categoryDto.Id && c.UserId == userId);
+            Id = updatedCategory.Id,
+            Name = updatedCategory.Name,
+            Color = updatedCategory.Color
+        };
+    }
 
-            if (category == null)
-                throw new UnauthorizedAccessException("Categoria não encontrada ou não pertence ao usuário");
+    public async Task DeleteCategoryAsync(int categoryId, string userId)
+    {
+        var category = await _categoryRepository
+            .GetCategoryAndAppointmentsAsync(categoryId, userId);
 
-            category.Name = categoryDto.Name;
-            category.Color = categoryDto.Color;
+        if (category == null)
+            throw new UnauthorizedAccessException("Categoria não encontrada ou não pertence ao usuário");
 
-            var updatedCategory = await _categoryRepository.UpdateAsync(category);
-
-            return new CategoryDto
-            {
-                Id = updatedCategory.Id,
-                Name = updatedCategory.Name,
-                Color = updatedCategory.Color
-            };
-        }
-
-        public async Task DeleteCategoryAsync(int categoryId, string userId)
-        {
-            var category = await _context.Categories
-                .Include(c => c.Appointments)
-                .FirstOrDefaultAsync(c => c.Id == categoryId && c.UserId == userId);
-
-            if (category == null)
-                throw new UnauthorizedAccessException("Categoria não encontrada ou não pertence ao usuário");
-
-            // Excluir todos os compromissos da categoria primeiro
-            if (category.Appointments.Any())
-            {
-                _context.Appointments.RemoveRange(category.Appointments);
-            }
-
-            // Depois excluir a categoria
-            await _categoryRepository.DeleteAsync(category);
-        }
+        await _categoryRepository.DeleteAsync(category);
     }
 }

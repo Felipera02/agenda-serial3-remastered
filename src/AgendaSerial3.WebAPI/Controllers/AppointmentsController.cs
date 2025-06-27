@@ -4,110 +4,104 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace AgendaSerial3.WebAPI.Controllers
+namespace AgendaSerial3.WebAPI.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class AppointmentsController(AppointmentService appointmentService) : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class AppointmentsController : ControllerBase
+    private readonly AppointmentService _appointmentService = appointmentService;
+
+    [HttpGet]
+    public async Task<IActionResult> GetAppointments([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
     {
-        private readonly AppointmentService _appointmentService;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
-        public AppointmentsController(AppointmentService appointmentService)
+        var appointments = await _appointmentService.GetUserAppointmentsAsync(userId, startDate, endDate);
+        return Ok(appointments);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateAppointment([FromBody] AppointmentDto appointmentDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (appointmentDto.StartDateTime >= appointmentDto.EndDateTime)
+            return BadRequest("Data/hora de início deve ser anterior à data/hora de fim");
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        try
         {
-            _appointmentService = appointmentService;
+            var appointment = await _appointmentService.CreateAppointmentAsync(appointmentDto, userId);
+            return CreatedAtAction(nameof(GetAppointments), new { id = appointment.Id }, appointment);
         }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAppointments([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        catch (UnauthorizedAccessException ex)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
-            var appointments = await _appointmentService.GetUserAppointmentsAsync(userId, startDate, endDate);
-            return Ok(appointments);
+            return BadRequest(new { message = ex.Message });
         }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateAppointment([FromBody] AppointmentDto appointmentDto)
+        catch (Exception ex)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (appointmentDto.StartDateTime >= appointmentDto.EndDateTime)
-                return BadRequest("Data/hora de início deve ser anterior à data/hora de fim");
-
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
-            try
-            {
-                var appointment = await _appointmentService.CreateAppointmentAsync(appointmentDto, userId);
-                return CreatedAtAction(nameof(GetAppointments), new { id = appointment.Id }, appointment);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return BadRequest(new { message = ex.Message });
         }
+    }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAppointment(int id, [FromBody] AppointmentDto appointmentDto)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateAppointment(int id, [FromBody] AppointmentDto appointmentDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (id != appointmentDto.Id)
+            return BadRequest("ID do compromisso não confere");
+
+        if (appointmentDto.StartDateTime >= appointmentDto.EndDateTime)
+            return BadRequest("Data/hora de início deve ser anterior à data/hora de fim");
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        try
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (id != appointmentDto.Id)
-                return BadRequest("ID do compromisso não confere");
-
-            if (appointmentDto.StartDateTime >= appointmentDto.EndDateTime)
-                return BadRequest("Data/hora de início deve ser anterior à data/hora de fim");
-
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
-            try
-            {
-                var appointment = await _appointmentService.UpdateAppointmentAsync(appointmentDto, userId);
-                return Ok(appointment);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var appointment = await _appointmentService.UpdateAppointmentAsync(appointmentDto, userId);
+            return Ok(appointment);
         }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAppointment(int id)
+        catch (UnauthorizedAccessException)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 
-            try
-            {
-                await _appointmentService.DeleteAppointmentAsync(id, userId);
-                return NoContent();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteAppointment(int id)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        try
+        {
+            await _appointmentService.DeleteAppointmentAsync(id, userId);
+            return NoContent();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
     }
 }

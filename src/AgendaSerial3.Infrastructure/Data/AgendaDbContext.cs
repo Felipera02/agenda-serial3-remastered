@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AgendaSerial3.Infrastructure.Data
 {
-    public class AgendaDbContext : IdentityDbContext<User>
+    public class AgendaDbContext(DbContextOptions<AgendaDbContext> options) : IdentityDbContext<User>(options)
     {
-        public AgendaDbContext(DbContextOptions<AgendaDbContext> options) : base(options)
-        {
-        }
-
         public DbSet<Category> Categories { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
 

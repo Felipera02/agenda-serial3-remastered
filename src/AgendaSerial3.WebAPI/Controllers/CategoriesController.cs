@@ -4,100 +4,94 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace AgendaSerial3.WebAPI.Controllers
+namespace AgendaSerial3.WebAPI.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class CategoriesController(CategoryService categoryService) : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class CategoriesController : ControllerBase
+    private readonly CategoryService _categoryService = categoryService;
+
+    [HttpGet]
+    public async Task<IActionResult> GetCategories()
     {
-        private readonly CategoryService _categoryService;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
-        public CategoriesController(CategoryService categoryService)
+        var categories = await _categoryService.GetUserCategoriesAsync(userId);
+        return Ok(categories);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateCategory([FromBody] CategoryDto categoryDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        try
         {
-            _categoryService = categoryService;
+            var category = await _categoryService.CreateCategoryAsync(categoryDto, userId);
+            return CreatedAtAction(nameof(GetCategories), new { id = category.Id }, category);
         }
-
-        [HttpGet]
-        public async Task<IActionResult> GetCategories()
+        catch (Exception ex)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
-            var categories = await _categoryService.GetUserCategoriesAsync(userId);
-            return Ok(categories);
+            return BadRequest(new { message = ex.Message });
         }
+    }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateCategory([FromBody] CategoryDto categoryDto)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDto categoryDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (id != categoryDto.Id)
+            return BadRequest("ID da categoria não confere");
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        try
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
-            try
-            {
-                var category = await _categoryService.CreateCategoryAsync(categoryDto, userId);
-                return CreatedAtAction(nameof(GetCategories), new { id = category.Id }, category);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var category = await _categoryService.UpdateCategoryAsync(categoryDto, userId);
+            return Ok(category);
         }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDto categoryDto)
+        catch (UnauthorizedAccessException)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (id != categoryDto.Id)
-                return BadRequest("ID da categoria não confere");
-
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
-            try
-            {
-                var category = await _categoryService.UpdateCategoryAsync(categoryDto, userId);
-                return Ok(category);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return NotFound();
         }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(int id)
+        catch (Exception ex)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 
-            try
-            {
-                await _categoryService.DeleteCategoryAsync(id, userId);
-                return NoContent();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteCategory(int id)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        try
+        {
+            await _categoryService.DeleteCategoryAsync(id, userId);
+            return NoContent();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
     }
 }

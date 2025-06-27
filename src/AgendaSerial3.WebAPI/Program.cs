@@ -67,7 +67,8 @@ builder.Services.AddCors(options =>
 });
 
 // Repository e Services
-builder.Services.AddScoped(typeof(GenericRepository<>));
+builder.Services.AddScoped<AppointmentRepository>();
+builder.Services.AddScoped<CategoryRepository>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<AppointmentService>();
 

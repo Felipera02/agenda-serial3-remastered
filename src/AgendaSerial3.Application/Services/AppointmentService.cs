@@ -1,132 +1,117 @@
 using AgendaSerial3.Application.DTOs;
 using AgendaSerial3.Domain.Entities;
-using AgendaSerial3.Infrastructure.Data;
 using AgendaSerial3.Infrastructure.Data.Repository;
-using Microsoft.EntityFrameworkCore;
 
-namespace AgendaSerial3.Application.Services
+namespace AgendaSerial3.Application.Services;
+
+public class AppointmentService(AppointmentRepository appointmentRepository, CategoryRepository categoryRepository)
 {
-    public class AppointmentService
+    private readonly AppointmentRepository _appointmentRepository = appointmentRepository;
+    private readonly CategoryRepository _categoryRepository = categoryRepository;
+
+    public async Task<IEnumerable<AppointmentDto>> GetUserAppointmentsAsync(string userId, DateTime startDate, DateTime endDate)
     {
-        private readonly GenericRepository<Appointment> _appointmentRepository;
-        private readonly AgendaDbContext _context;
+        var appointments = await _appointmentRepository.GetAppointmentsAndCategoriesByUserIdAndDatesAsync(userId, startDate, endDate);
 
-        public AppointmentService(GenericRepository<Appointment> appointmentRepository, AgendaDbContext context)
+        return appointments.Select(a => new AppointmentDto
         {
-            _appointmentRepository = appointmentRepository;
-            _context = context;
-        }
+            Id = a.Id,
+            Title = a.Title,
+            Description = a.Description,
+            StartDateTime = a.StartDateTime,
+            EndDateTime = a.EndDateTime,
+            CategoryId = a.CategoryId,
+            CategoryName = a.Category.Name,
+            CategoryColor = a.Category.Color,
+            IsCompleted = a.IsCompleted
+        });
+    }
 
-        public async Task<IEnumerable<AppointmentDto>> GetUserAppointmentsAsync(string userId, DateTime startDate, DateTime endDate)
+    public async Task<AppointmentDto> CreateAppointmentAsync(AppointmentDto appointmentDto, string userId)
+    {
+        // Verificar se a categoria pertence ao usuário
+        var categoryExists = await _categoryRepository
+            .ExistsAsync(c => c.Id == appointmentDto.CategoryId && c.UserId == userId);
+
+        if (!categoryExists)
+            throw new UnauthorizedAccessException("Categoria não encontrada ou não pertence ao usuário");
+
+        var appointment = new Appointment
         {
-            var appointments = await _context.Appointments
-                .Include(a => a.Category)
-                .Where(a => a.UserId == userId &&
-                           a.StartDateTime >= startDate &&
-                           a.StartDateTime <= endDate)
-                .ToListAsync();
+            Title = appointmentDto.Title,
+            Description = appointmentDto.Description,
+            StartDateTime = appointmentDto.StartDateTime,
+            EndDateTime = appointmentDto.EndDateTime,
+            CategoryId = appointmentDto.CategoryId,
+            UserId = userId,
+            IsCompleted = appointmentDto.IsCompleted
+        };
 
-            return appointments.Select(a => new AppointmentDto
-            {
-                Id = a.Id,
-                Title = a.Title,
-                Description = a.Description,
-                StartDateTime = a.StartDateTime,
-                EndDateTime = a.EndDateTime,
-                CategoryId = a.CategoryId,
-                CategoryName = a.Category.Name,
-                CategoryColor = a.Category.Color,
-                IsCompleted = a.IsCompleted
-            });
-        }
+        var createdAppointment = await _appointmentRepository.AddAsync(appointment);
 
-        public async Task<AppointmentDto> CreateAppointmentAsync(AppointmentDto appointmentDto, string userId)
+        var category = await _categoryRepository.GetByIdAsync(appointmentDto.CategoryId);
+
+        return new AppointmentDto
         {
-            // Verificar se a categoria pertence ao usuário
-            var categoryExists = await _context.Categories
-                .AnyAsync(c => c.Id == appointmentDto.CategoryId && c.UserId == userId);
+            Id = createdAppointment.Id,
+            Title = createdAppointment.Title,
+            Description = createdAppointment.Description,
+            StartDateTime = createdAppointment.StartDateTime,
+            EndDateTime = createdAppointment.EndDateTime,
+            CategoryId = createdAppointment.CategoryId,
+            CategoryName = category?.Name ?? "",
+            CategoryColor = category?.Color ?? "",
+            IsCompleted = createdAppointment.IsCompleted
+        };
+    }
 
-            if (!categoryExists)
-                throw new UnauthorizedAccessException("Categoria não encontrada ou não pertence ao usuário");
+    public async Task<AppointmentDto> UpdateAppointmentAsync(AppointmentDto appointmentDto, string userId)
+    {
+        var appointment = await _appointmentRepository
+            .GetAppointmentAndCategoriesAsync(appointmentDto.Id, userId);
 
-            var appointment = new Appointment
-            {
-                Title = appointmentDto.Title,
-                Description = appointmentDto.Description,
-                StartDateTime = appointmentDto.StartDateTime,
-                EndDateTime = appointmentDto.EndDateTime,
-                CategoryId = appointmentDto.CategoryId,
-                UserId = userId,
-                IsCompleted = appointmentDto.IsCompleted
-            };
+        if (appointment == null)
+            throw new UnauthorizedAccessException("Compromisso não encontrado ou não pertence ao usuário");
 
-            var createdAppointment = await _appointmentRepository.AddAsync(appointment);
+        // Verificar se a nova categoria pertence ao usuário
+        var categoryExists = await _categoryRepository
+            .ExistsAsync(c => c.Id == appointmentDto.CategoryId && c.UserId == userId);
 
-            var category = await _context.Categories.FindAsync(appointmentDto.CategoryId);
+        if (!categoryExists)
+            throw new UnauthorizedAccessException("Categoria não encontrada ou não pertence ao usuário");
 
-            return new AppointmentDto
-            {
-                Id = createdAppointment.Id,
-                Title = createdAppointment.Title,
-                Description = createdAppointment.Description,
-                StartDateTime = createdAppointment.StartDateTime,
-                EndDateTime = createdAppointment.EndDateTime,
-                CategoryId = createdAppointment.CategoryId,
-                CategoryName = category?.Name ?? "",
-                CategoryColor = category?.Color ?? "",
-                IsCompleted = createdAppointment.IsCompleted
-            };
-        }
+        appointment.Title = appointmentDto.Title;
+        appointment.Description = appointmentDto.Description;
+        appointment.StartDateTime = appointmentDto.StartDateTime;
+        appointment.EndDateTime = appointmentDto.EndDateTime;
+        appointment.CategoryId = appointmentDto.CategoryId;
+        appointment.IsCompleted = appointmentDto.IsCompleted;
+        appointment.UpdatedAt = DateTime.UtcNow;
 
-        public async Task<AppointmentDto> UpdateAppointmentAsync(AppointmentDto appointmentDto, string userId)
+        var updatedAppointment = await _appointmentRepository.UpdateAsync(appointment);
+
+        return new AppointmentDto
         {
-            var appointment = await _context.Appointments
-                .Include(a => a.Category)
-                .FirstOrDefaultAsync(a => a.Id == appointmentDto.Id && a.UserId == userId);
+            Id = updatedAppointment.Id,
+            Title = updatedAppointment.Title,
+            Description = updatedAppointment.Description,
+            StartDateTime = updatedAppointment.StartDateTime,
+            EndDateTime = updatedAppointment.EndDateTime,
+            CategoryId = updatedAppointment.CategoryId,
+            CategoryName = updatedAppointment.Category.Name,
+            CategoryColor = updatedAppointment.Category.Color,
+            IsCompleted = updatedAppointment.IsCompleted
+        };
+    }
 
-            if (appointment == null)
-                throw new UnauthorizedAccessException("Compromisso não encontrado ou não pertence ao usuário");
+    public async Task DeleteAppointmentAsync(int appointmentId, string userId)
+    {
+        var appointment = await _appointmentRepository
+            .GetByExpression(a => a.Id == appointmentId && a.UserId == userId);
 
-            // Verificar se a nova categoria pertence ao usuário
-            var categoryExists = await _context.Categories
-                .AnyAsync(c => c.Id == appointmentDto.CategoryId && c.UserId == userId);
+        if (appointment == null)
+            throw new UnauthorizedAccessException("Compromisso não encontrado ou não pertence ao usuário");
 
-            if (!categoryExists)
-                throw new UnauthorizedAccessException("Categoria não encontrada ou não pertence ao usuário");
-
-            appointment.Title = appointmentDto.Title;
-            appointment.Description = appointmentDto.Description;
-            appointment.StartDateTime = appointmentDto.StartDateTime;
-            appointment.EndDateTime = appointmentDto.EndDateTime;
-            appointment.CategoryId = appointmentDto.CategoryId;
-            appointment.IsCompleted = appointmentDto.IsCompleted;
-            appointment.UpdatedAt = DateTime.UtcNow;
-
-            var updatedAppointment = await _appointmentRepository.UpdateAsync(appointment);
-
-            return new AppointmentDto
-            {
-                Id = updatedAppointment.Id,
-                Title = updatedAppointment.Title,
-                Description = updatedAppointment.Description,
-                StartDateTime = updatedAppointment.StartDateTime,
-                EndDateTime = updatedAppointment.EndDateTime,
-                CategoryId = updatedAppointment.CategoryId,
-                CategoryName = updatedAppointment.Category.Name,
-                CategoryColor = updatedAppointment.Category.Color,
-                IsCompleted = updatedAppointment.IsCompleted
-            };
-        }
-
-        public async Task DeleteAppointmentAsync(int appointmentId, string userId)
-        {
-            var appointment = await _context.Appointments
-                .FirstOrDefaultAsync(a => a.Id == appointmentId && a.UserId == userId);
-
-            if (appointment == null)
-                throw new UnauthorizedAccessException("Compromisso não encontrado ou não pertence ao usuário");
-
-            await _appointmentRepository.DeleteAsync(appointment);
-        }
+        await _appointmentRepository.DeleteAsync(appointment);
     }
 }
