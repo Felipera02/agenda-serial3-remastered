@@ -39,7 +39,7 @@ public async Task<IEnumerable<Appointment>> GetAppointmentsAndCategoriesByUserId
 ```
 Neste Trecho vemos que o nome do método está bem descritivo e que os outros itens seguem a conveção de Camel Case ou Pascal Case. 
 
-# ** Documentação mínima de código  **
+# Documentação mínima de código 
 Não optamos muito pela utilização de comentários, mas no nosso *program.cs* foi dividido de modo que cada comando semelhante fosse agrupado sob o comentário referente aonde tal grupo de linhas 
 ```csharp
 // CORS
