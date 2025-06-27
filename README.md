@@ -1,8 +1,8 @@
-# EM CONSTRUÇÃO
-
-#Para testar nossa Agenda
-- **Ambiente de desenvolvimento:** no Visual Studio, foi configurado um perfil de inicialização compartilhável que roda o projeto da API e do Frontend ao mesmo tempo. Caso não consiga acessá-lo, abra dois terminais e rode os projetos (AgendaSerial3.WebAPI e AgendaSerial3.BlazorWasm) em cada instância
-- **Ambiente de produção:** [URL DISPONÍVEL APENAS DEPOIS DO DEPLOY DO PROJETO - PREVISTO PARA 27/06]
+# Para testar nossa Agenda
+- **Ambiente de desenvolvimento:**
+	-  rode o comando ``dotnet ef database update --project src/AgendaSerial3.Infrastructure --startup-project src/AgendaSerial3.WebAPI`` na raiz da solução
+	-  no Visual Studio, foi configurado um perfil de inicialização compartilhável que roda o projeto da API e do Frontend ao mesmo tempo. Caso não consiga acessá-lo, abra dois terminais e rode os projetos (AgendaSerial3.WebAPI e AgendaSerial3.BlazorWasm) em cada instância
+- **URL do projeto publicado no Azure:** https://happy-desert-060f7ec0f.2.azurestaticapps.net/
 
 # Integrantes
 - Erick da Silva Pereira Pinto - 06007298
