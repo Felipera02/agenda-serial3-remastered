@@ -18,6 +18,11 @@ namespace AgendaSerial3.BlazorWasm
                 ? "https://localhost:7000/"
                 : "https://agenda-serial-3-app.azurewebsites.net";
 
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri(baseApiUrl)
+            });
+
             // Local Storage
             builder.Services.AddBlazoredLocalStorage();
 
