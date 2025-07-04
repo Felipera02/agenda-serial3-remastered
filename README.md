@@ -1,3 +1,6 @@
+# Descrição do projeto
+O projeto consiste em uma agenda que possibilita o usuário adicionar e remover seus compromissos, podendo agrupá-los por categorias e visualizá-los em um calendário interativo.
+
 # Para testar nossa Agenda
 - **Ambiente de desenvolvimento:**
 	-  rode o comando ``dotnet ef database update --project src/AgendaSerial3.Infrastructure --startup-project src/AgendaSerial3.WebAPI`` na raiz da solução
